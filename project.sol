@@ -59,7 +59,7 @@ contract DDNS {
     
 
     function getExpirationDate(bytes domain) public view returns (uint) {
-        
+
     }
 
     ///////// IPFS //////////////
@@ -80,7 +80,7 @@ contract DDNS {
     ///////// OWNER //////////////
 
     // Returns IP or IPFS address
-    function withdraw(bytes domain) public {
+    function withdraw(uint amount) public {
         
     }
 
