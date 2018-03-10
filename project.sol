@@ -1,4 +1,5 @@
 pragma solidity ^0.4.16;
+pragma experimental ABIEncoderV2;
 
 contract ContractWithCommonModifiers {
     modifier isMsgFrom(address expected){ 
@@ -35,13 +36,18 @@ contract ContractWithCommonModifiers {
         require(condition);
         _;
     }
+    
+    modifier isShorterThanOrEqual(bytes input, uint maxLen){ 
+        require(input.length <= maxLen);
+        _;
+    }
 }
 
 contract Owned is ContractWithCommonModifiers {
     address public owner;
 
-    function Owned(address _owner) public {
-        owner = _owner;
+    function Owned() public {
+        owner = msg.sender;
     }
 
     // Returns IP or IPFS address
@@ -59,7 +65,7 @@ contract DDNS is Owned {
 
     struct Domain {
         uint expires;
-        bytes4 ip;
+        bytes ipfsAddress;
         address owner;
     }
 
@@ -84,13 +90,15 @@ contract DDNS is Owned {
 
     event domainRegisteredEvent (address actor, bytes domain, uint weiPaid, uint expires);
     event domainExtendedEvent (address actor, bytes domain, uint weiPaid, uint expires);
-    event domainEditedEvent (address actor, bytes domain, bytes4 oldIP, bytes4 newIP);
+    event domainEditedEvent (address actor, bytes domain, bytes oldIP, bytes newIP);
     event domainTransferedEvent (address actor, bytes domain, address newOwner);
 
     //the domain is bytes, because string is UTF-8 encoded and we cannot get its length
-    //the IP is bytes4 because it is more efficient in storing the sequence
-    function register(bytes domain, bytes4 ip) public payable 
-        paidAtLeast(getPrice(domain)) 
+    //the IP is bytes because it is more efficient in storing the sequence
+    function register(bytes domain, bytes ipfsAddress) public payable 
+        isShorterThanOrEqual(ipfsAddress, 100)
+        isShorterThanOrEqual(domain, 100)
+        paidAtLeast(getPrice(domain))
     {
         uint paidDurations = msg.value / getPrice(domain);
         bool isUnused = isDomainFree(domain);
@@ -103,33 +111,35 @@ contract DDNS is Owned {
         if (isUnused) {
             expires = now + (paidDurations * reserveDuration);
             receipts[msg.sender].push(Receipt(msg.value, block.timestamp, expires));
-            domains[domain] = Domain(expires, ip, msg.sender);
-            domainRegisteredEvent(msg.sender, domain, msg.value, expires);
+            domains[domain] = Domain(expires, ipfsAddress, msg.sender);
+            emit domainRegisteredEvent(msg.sender, domain, msg.value, expires);
         } else if (owner == msg.sender) {
             expires = domains[domain].expires + (paidDurations * reserveDuration);
             receipts[msg.sender].push(Receipt(msg.value, block.timestamp, expires));
             domains[domain].expires = expires;
-            domainRegisteredEvent(msg.sender, domain, msg.value, expires);
+            emit domainRegisteredEvent(msg.sender, domain, msg.value, expires);
         }
     }
     
-    function edit(bytes domain, bytes4 newIp) public {
+    function edit(bytes domain, bytes newIpfsAddress) public
+        isShorterThanOrEqual(newIpfsAddress, 100)
+    {
         require(getOwnerOf(domain) == msg.sender);
-        domainEditedEvent(msg.sender, domain, domains[domain].ip, newIp);
-        domains[domain].ip = newIp;
+        emit domainEditedEvent(msg.sender, domain, domains[domain].ipfsAddress, newIpfsAddress);
+        domains[domain].ipfsAddress = newIpfsAddress;
     }
 
     function transferDomain(bytes domain, address newOwner) public {
         require(getOwnerOf(domain) == msg.sender);
-        domainTransferedEvent(msg.sender, domain, newOwner);
+        emit domainTransferedEvent(msg.sender, domain, newOwner);
         domains[domain].owner = newOwner;
     }
     
     ///// [ VIEWS ] /////
 
-    function getIP(bytes domain) public view returns (bytes4) {
+    function getIP(bytes domain) public view returns (bytes) {
         require(!isDomainFree(domain));
-        return domains[domain].ip;
+        return domains[domain].ipfsAddress;
     }
 
     function getPrice(bytes domain) public view returns (uint) {
