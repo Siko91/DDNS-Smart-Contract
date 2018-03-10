@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>DDNS with ETH Rinkeby</title>
+    <link rel="icon" href="icon.png">
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+</head>
+
+<body>
+    <div style="height:300px"></div>
+    <div class="center-block" style="width:85%;">
+        <input type="search" id="domain-go" class="col-md-6">
+        <div class="btn-group col-md-6">
+            <a class="btn btn-success col-md-3" id="btn-go">GO!</a>
+            <button type="button" class="btn btn-default col-md-3" data-toggle="modal" data-target=".reg-modal">register</button>
+            <button type="button" class="btn btn-default col-md-3" data-toggle="modal" data-target=".edit-modal">edit</button>
+            <button type="button" class="btn btn-default col-md-3" data-toggle="modal" data-target=".transfer-modal">transfer</button>
+        </div>
+    </div>
+
+    <div class="modal fade reg-modal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div>
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="gridSystemModalLabel">Register or Extend a domain</h4>
+                    </div>
+
+                    <div class="modal-body">
+                        <span class="col-md-4">DOMAIN NAME:</span> <input class="col-md-8" type="text" id="domain-reg">
+                        <span class="col-md-4">IPFS ADDRESS:</span> <input class="col-md-8" type="text" id="addr-reg">
+                        <span class="col-md-4">HOW MANY YEARS:</span> <input class="col-md-8" type="number" value="1" min="1"
+                            id="years-reg">
+                        <button class="center-block btn btn-primary" style="width:50%" type="button" id="btn-reg">REGISTER</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade edit-modal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div>
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="gridSystemModalLabel">Change IPFS Address</h4>
+                    </div>
+
+                    <div class="modal-body">
+                        <span class="col-md-4">DOMAIN NAME:</span> <input class="col-md-8" type="text" id="domain-edit">
+                        <span class="col-md-4">NEW ADDRESS:</span> <input class="col-md-8" type="text" id="addr-edit">
+                        <button class="center-block btn btn-primary" style="width:50%" type="button" id="btn-edit">EDIT</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade transfer-modal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div>
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="gridSystemModalLabel">Transfer ownership to different address</h4>
+                    </div>
+
+                    <div class="modal-body">
+                        <span class="col-md-4">DOMAIN NAME:</span> <input class="col-md-8" type="text" id="domain-transfer">
+                        <span class="col-md-4">NEW OWNER:</span> <input class="col-md-8" type="text" id="owner-transfer">
+                        <button class="center-block btn btn-primary" style="width:50%" type="button" id="btn-transfer">TRANSFER</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+<footer>
+    <script src="./ddns.js"></script>
+</footer>
+
+</html>
