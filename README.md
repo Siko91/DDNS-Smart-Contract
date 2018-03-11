@@ -1,6 +1,7 @@
 # DDNS-Smart-Contract
-A final project for my solidity course
-Web Preview : [RawGit Link](https://rawgit.com/Siko91/DDNS-Smart-Contract/master/webUI/index.html)
+A final project for my solidity course.
+
+ - Web Preview : [RawGit Link](https://rawgit.com/Siko91/DDNS-Smart-Contract/master/webUI/index.html)
 
 ##  [ DDNS ]
     Mandatory Tasks
