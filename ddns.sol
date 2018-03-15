@@ -1,5 +1,4 @@
-pragma solidity ^0.4.16;
-pragma experimental ABIEncoderV2;
+pragma solidity 0.4.19;
 
 contract ContractWithCommonModifiers {
     modifier isMsgFrom(address expected){ 
@@ -18,7 +17,7 @@ contract ContractWithCommonModifiers {
     }
     
     modifier contractHasAtLeast(uint minWei){ 
-        require(this.balance >= minWei);
+        require(address(this).balance >= minWei);
         _;
     }
     
@@ -27,8 +26,8 @@ contract ContractWithCommonModifiers {
         _;
     }
     
-    modifier numberIsAtLeast(uint num, uint max){ 
-        require(num <= max);
+    modifier numberIsAtLeast(uint num, uint min){ 
+        require(num <= min);
         _;
     }
     
@@ -96,6 +95,7 @@ contract DDNS is Owned {
     //the domain is bytes, because string is UTF-8 encoded and we cannot get its length
     //the IP is bytes because it is more efficient in storing the sequence
     function register(bytes domain, bytes ipfsAddress) public payable 
+        numberIsAtLeast(domain.length, 1)
         isShorterThanOrEqual(ipfsAddress, 100)
         isShorterThanOrEqual(domain, 100)
         paidAtLeast(getPrice(domain))
@@ -112,12 +112,12 @@ contract DDNS is Owned {
             expires = now + (paidDurations * reserveDuration);
             receipts[msg.sender].push(Receipt(msg.value, block.timestamp, expires));
             domains[domain] = Domain(expires, ipfsAddress, msg.sender);
-            emit domainRegisteredEvent(msg.sender, domain, msg.value, expires);
+            domainRegisteredEvent(msg.sender, domain, msg.value, expires);
         } else if (owner == msg.sender) {
             expires = domains[domain].expires + (paidDurations * reserveDuration);
             receipts[msg.sender].push(Receipt(msg.value, block.timestamp, expires));
             domains[domain].expires = expires;
-            emit domainRegisteredEvent(msg.sender, domain, msg.value, expires);
+            domainRegisteredEvent(msg.sender, domain, msg.value, expires);
         }
     }
     
@@ -125,13 +125,13 @@ contract DDNS is Owned {
         isShorterThanOrEqual(newIpfsAddress, 100)
     {
         require(getOwnerOf(domain) == msg.sender);
-        emit domainEditedEvent(msg.sender, domain, domains[domain].ipfsAddress, newIpfsAddress);
+        domainEditedEvent(msg.sender, domain, domains[domain].ipfsAddress, newIpfsAddress);
         domains[domain].ipfsAddress = newIpfsAddress;
     }
 
     function transferDomain(bytes domain, address newOwner) public {
         require(getOwnerOf(domain) == msg.sender);
-        emit domainTransferedEvent(msg.sender, domain, newOwner);
+        domainTransferedEvent(msg.sender, domain, newOwner);
         domains[domain].owner = newOwner;
     }
     
@@ -143,6 +143,7 @@ contract DDNS is Owned {
     }
 
     function getPrice(bytes domain) public view returns (uint) {
+        assert(domain.length > 0);
         if (domain.length > pricesForShortDomains.length) {
             return price;
         } else {

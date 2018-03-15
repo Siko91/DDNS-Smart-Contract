@@ -1,7 +1,7 @@
 
 var contractInstance;
 var abi = [{ "constant": true, "inputs": [{ "name": "domain", "type": "bytes" }], "name": "getPrice", "outputs": [{ "name": "", "type": "uint256" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [], "name": "reserveDuration", "outputs": [{ "name": "", "type": "uint256" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [{ "name": "domain", "type": "bytes" }], "name": "getExpirationDate", "outputs": [{ "name": "", "type": "uint256" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [{ "name": "", "type": "uint256" }], "name": "pricesForShortDomains", "outputs": [{ "name": "", "type": "uint256" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [], "name": "price", "outputs": [{ "name": "", "type": "uint256" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [], "name": "owner", "outputs": [{ "name": "", "type": "address" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [{ "name": "domain", "type": "bytes" }], "name": "isDomainFree", "outputs": [{ "name": "", "type": "bool" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [{ "name": "account", "type": "address" }], "name": "getReceipts", "outputs": [{ "components": [{ "name": "amountPaidWei", "type": "uint256" }, { "name": "timestamp", "type": "uint256" }, { "name": "expires", "type": "uint256" }], "name": "", "type": "tuple[]" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [{ "name": "domain", "type": "bytes" }], "name": "getIP", "outputs": [{ "name": "", "type": "bytes" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [{ "name": "domain", "type": "bytes" }], "name": "getOwnerOf", "outputs": [{ "name": "", "type": "address" }], "payable": false, "stateMutability": "view", "type": "function" }, { "anonymous": false, "inputs": [{ "indexed": false, "name": "actor", "type": "address" }, { "indexed": false, "name": "domain", "type": "bytes" }, { "indexed": false, "name": "oldIP", "type": "bytes" }, { "indexed": false, "name": "newIP", "type": "bytes" }], "name": "domainEditedEvent", "type": "event" }, { "constant": false, "inputs": [{ "name": "amount", "type": "uint256" }], "name": "withdraw", "outputs": [], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "anonymous": false, "inputs": [{ "indexed": false, "name": "actor", "type": "address" }, { "indexed": false, "name": "domain", "type": "bytes" }, { "indexed": false, "name": "weiPaid", "type": "uint256" }, { "indexed": false, "name": "expires", "type": "uint256" }], "name": "domainExtendedEvent", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": false, "name": "actor", "type": "address" }, { "indexed": false, "name": "domain", "type": "bytes" }, { "indexed": false, "name": "weiPaid", "type": "uint256" }, { "indexed": false, "name": "expires", "type": "uint256" }], "name": "domainRegisteredEvent", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": false, "name": "actor", "type": "address" }, { "indexed": false, "name": "domain", "type": "bytes" }, { "indexed": false, "name": "newOwner", "type": "address" }], "name": "domainTransferedEvent", "type": "event" }, { "constant": false, "inputs": [{ "name": "domain", "type": "bytes" }, { "name": "newIpfsAddress", "type": "bytes" }], "name": "edit", "outputs": [], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": false, "inputs": [{ "name": "domain", "type": "bytes" }, { "name": "ipfsAddress", "type": "bytes" }], "name": "register", "outputs": [], "payable": true, "stateMutability": "payable", "type": "function" }, { "constant": false, "inputs": [{ "name": "domain", "type": "bytes" }, { "name": "newOwner", "type": "address" }], "name": "transferDomain", "outputs": [], "payable": false, "stateMutability": "nonpayable", "type": "function" }];
-var address = "0xb852561aa13a8b636f3c0e974f323e464c51d8eb";
+var address = "0x72A3a6616E425fe586D8471286dfd3D1E1aaeb75";
 
 if (!web3) {
     //if there is no web3 variable
@@ -27,7 +27,7 @@ function openInNewTab(url) {
     win.focus();
 }
 
-function callContractMethod(methodName, args, value, callback) {
+function callContractMethod(methodName, args, value, callback, local) {
 
     var onResponce = function (err, res) {
         if (!err) {
@@ -50,7 +50,9 @@ function callContractMethod(methodName, args, value, callback) {
 
         args.push(options);
         args.push(onResponce);
-        contractInstance[methodName].apply(this, args);
+
+        var funcToCall = local ? contractInstance[methodName] : contractInstance[methodName].call;
+        funcToCall.apply(this, args);
     });
 }
 

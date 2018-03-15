@@ -1,0 +1,22 @@
+{
+  "name": "ddns-smart-contract",
+  "version": "1.0.0",
+  "description": "A DDNS smart contract",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "cp ./ddns.sol ./test/contracts/; cd test; truffle test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Siko91/DDNS-Smart-Contract.git"
+  },
+  "author": "Alexander Dinkov (alexander.n.dinkov@gmail.com)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Siko91/DDNS-Smart-Contract/issues"
+  },
+  "homepage": "https://github.com/Siko91/DDNS-Smart-Contract#readme"
+}
