@@ -22,12 +22,12 @@ contract ContractWithCommonModifiers {
     }
     
     modifier numberIsAtMost(uint num, uint max){ 
-        require(num >= max);
+        require(num <= max);
         _;
     }
     
     modifier numberIsAtLeast(uint num, uint min){ 
-        require(num <= min);
+        require(num >= min);
         _;
     }
     
@@ -92,12 +92,10 @@ contract DDNS is Owned {
     event domainEditedEvent (address actor, bytes domain, bytes oldIP, bytes newIP);
     event domainTransferedEvent (address actor, bytes domain, address newOwner);
 
-    //the domain is bytes, because string is UTF-8 encoded and we cannot get its length
-    //the IP is bytes because it is more efficient in storing the sequence
     function register(bytes domain, bytes ipfsAddress) public payable 
         numberIsAtLeast(domain.length, 1)
-        isShorterThanOrEqual(ipfsAddress, 100)
         isShorterThanOrEqual(domain, 100)
+        isShorterThanOrEqual(ipfsAddress, 100)
         paidAtLeast(getPrice(domain))
     {
         uint paidDurations = msg.value / getPrice(domain);
