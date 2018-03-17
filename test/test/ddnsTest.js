@@ -1,4 +1,4 @@
-const ddns = artifacts.require("ddns");
+const ddns = artifacts.require("DDNS");
 
 contract('DDNS test', async (accounts) => {
 
