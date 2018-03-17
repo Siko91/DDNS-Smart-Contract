@@ -129,6 +129,7 @@ contract DDNS is Owned {
 
     function transferDomain(bytes domain, address newOwner) public {
         require(getOwnerOf(domain) == msg.sender);
+        require(!isDomainFree(domain));
         domainTransferedEvent(msg.sender, domain, newOwner);
         domains[domain].owner = newOwner;
     }
