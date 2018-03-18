@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/Siko91/DDNS-Smart-Contract.svg?branch=master)](https://travis-ci.org/Siko91/DDNS-Smart-Contract)
+
 # DDNS-Smart-Contract
 A final project for my solidity course.
 
