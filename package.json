@@ -18,5 +18,9 @@
   "bugs": {
     "url": "https://github.com/Siko91/DDNS-Smart-Contract/issues"
   },
-  "homepage": "https://github.com/Siko91/DDNS-Smart-Contract#readme"
+  "homepage": "https://github.com/Siko91/DDNS-Smart-Contract#readme",
+  "dependencies": {
+    "chai": "^4.1.2",
+    "chai-as-promised": "^7.1.1"
+  }
 }
