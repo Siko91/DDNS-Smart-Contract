@@ -1,8 +1,7 @@
 const ddns = artifacts.require("DDNS");
 
-contract('DDNS test', async (accounts) => {
+contract('DDNS test: ', async (accounts) => {
 
-  /** PARSING FUNCTION */
   function hexToBytes(hex) {
     if (hex.substr(0, 2) == "0x")
       hex = hex.substr(2);
@@ -11,7 +10,7 @@ contract('DDNS test', async (accounts) => {
     }
     return bytes;
   }
-  /** PARSING FUNCTION */
+
   function bytesToString(bytes) {
     var result = "";
     for (var i = 0; i < bytes.length; i++) {
@@ -19,14 +18,29 @@ contract('DDNS test', async (accounts) => {
     }
     return result;
   }
-  /** UTILITY FUNCTION */
-  var chars = 'abcdefghijklmnopqrstuvwxyz_!@#$%^&*()-+=123456789 ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-  function randomDomainName(len) {
 
+  function increaseTime(increaseBy) {
+    web3.eth.getBlock(web3.eth.blockNumber).timestamp
+    web3.currentProvider.send({
+      jsonrpc: "2.0",
+      method: "evm_increaseTime",
+      params: [increaseBy],
+      id: 0
+    })
+    web3.currentProvider.send({
+      jsonrpc: "2.0",
+      method: "evm_mine",
+      params: [],
+      id: 0
+    })
+  }
+
+  var chars = 'abcdefghijklmnopqrstuvwxyz_!@#$%^&*()-+=123456789 ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
+  function randomDomainName(len) {
     var result = [];
     for (var i = 0; i < len; i++)
       result.push(chars[Math.random() * chars.length | 0]);
-
     var domainName = result.join('');
     console.log("\t\t - Selected domain name: " + domainName);
     return domainName;
@@ -38,14 +52,21 @@ contract('DDNS test', async (accounts) => {
   var year = 31557600; // in seconds
   var day = 86400; // in seconds
 
-  var noPayTxOpts = { from: accounts[1], gas: 3000000 };
+  var noPayTxOpts = {
+    from: accounts[1],
+    gas: 3000000
+  };
 
   ////////////////////////////////////////
   /** DOMAIN REGISTRY */
   it("Register domain and get it", async () => {
     var domain = randomDomainName(20);
 
-    var regTxOpts = { from: accounts[1], gas: 3000000, value: 1 * ether };
+    var regTxOpts = {
+      from: accounts[1],
+      gas: 3000000,
+      value: 1 * ether
+    };
     var instance = await ddns.deployed();
     await instance.register(domain, ipfsAddr, regTxOpts);
 
@@ -57,7 +78,11 @@ contract('DDNS test', async (accounts) => {
   it("Register domain, edit it and get it", async () => {
     var domain = randomDomainName(20);
 
-    var regTxOpts = { from: accounts[1], gas: 3000000, value: 1 * ether };
+    var regTxOpts = {
+      from: accounts[1],
+      gas: 3000000,
+      value: 1 * ether
+    };
     var instance = await ddns.deployed();
     await instance.register(domain, ipfsAddr, regTxOpts);
 
@@ -70,7 +95,11 @@ contract('DDNS test', async (accounts) => {
   it("Register domain, transfer it and check the owner", async () => {
     var domain = randomDomainName(20);
 
-    var regTxOpts = { from: accounts[1], gas: 3000000, value: 1 * ether };
+    var regTxOpts = {
+      from: accounts[1],
+      gas: 3000000,
+      value: 1 * ether
+    };
     var instance = await ddns.deployed();
     await instance.register(domain, ipfsAddr, regTxOpts);
 
@@ -84,7 +113,11 @@ contract('DDNS test', async (accounts) => {
 
     var now = new Date() - 0; // '-0' converts it to number
 
-    var regTxOpts = { from: accounts[1], gas: 3000000, value: 1 * ether };
+    var regTxOpts = {
+      from: accounts[1],
+      gas: 3000000,
+      value: 1 * ether
+    };
     var instance = await ddns.deployed();
 
     await instance.register(domain, ipfsAddr, regTxOpts);
@@ -107,7 +140,11 @@ contract('DDNS test', async (accounts) => {
 
     var now = new Date() - 0; // '-0' converts it to number
 
-    var regTxOpts = { from: accounts[1], gas: 3000000, value: 1 * ether };
+    var regTxOpts = {
+      from: accounts[1],
+      gas: 3000000,
+      value: 1 * ether
+    };
     var instance = await ddns.deployed();
 
     regTxOpts.value = regTxOpts.value * 3; // for 3 years
@@ -123,7 +160,11 @@ contract('DDNS test', async (accounts) => {
     var domain = randomDomainName(8);
     var now = new Date() - 0; // '-0' converts it to number
 
-    var regTxOpts = { from: accounts[1], gas: 3000000, value: 2.01 * ether }; // double price for 8 chars
+    var regTxOpts = {
+      from: accounts[1],
+      gas: 3000000,
+      value: 2.01 * ether
+    }; // double price for 8 chars
     var instance = await ddns.deployed();
 
     regTxOpts.value = regTxOpts.value * 3; // for 3 years
@@ -143,7 +184,7 @@ contract('DDNS test', async (accounts) => {
 
     try {
       await instance.edit(domain, "edited", noPayTxOpts);
-      assert(false, "Expected 'edit' to throw an exception, but it didn't.");
+      assert(false, "expected 'edit' to throw an exception, but it didn't.");
     } catch (error) {
       expect(error.message).to.equal("VM Exception while processing transaction: revert");
     }
@@ -155,7 +196,7 @@ contract('DDNS test', async (accounts) => {
 
     try {
       await instance.transferDomain(domain, accounts[2], noPayTxOpts);
-      assert(false, "Expected 'transferDomain' to throw an exception, but it didn't.");
+      assert(false, "expected 'edit' to throw an exception, but it didn't.");
     } catch (error) {
       expect(error.message).to.equal("VM Exception while processing transaction: revert");
     }
@@ -167,7 +208,7 @@ contract('DDNS test', async (accounts) => {
 
     try {
       await instance.getIP.call(domain, noPayTxOpts);
-      assert(false, "Expected 'getIP' to throw an exception, but it didn't.");
+      assert(false, "expected 'getIP' to throw an exception, but it didn't.");
     } catch (error) {
       expect(error.message).to.equal("VM Exception while processing transaction: revert");
     }
@@ -176,14 +217,18 @@ contract('DDNS test', async (accounts) => {
   it("Register domain and try to register with different user", async () => {
     var domain = randomDomainName(20);
 
-    var regTxOpts = { from: accounts[1], gas: 3000000, value: 1 * ether };
+    var regTxOpts = {
+      from: accounts[1],
+      gas: 3000000,
+      value: 1 * ether
+    };
     var instance = await ddns.deployed();
     await instance.register(domain, ipfsAddr, regTxOpts);
+    regTxOpts.from = accounts[2];
 
     try {
-      regTxOpts.from = accounts[2];
       await instance.register(domain, ipfsAddr, regTxOpts);
-      assert(false, "Expected 'register' to throw an exception, but it didn't.");
+      assert(false, "expected 'register' to throw an exception, but it didn't.");
     } catch (error) {
       expect(error.message).to.equal("VM Exception while processing transaction: revert");
     }
@@ -192,14 +237,22 @@ contract('DDNS test', async (accounts) => {
   it("Register domain and try to edit with different user", async () => {
     var domain = randomDomainName(20);
 
-    var regTxOpts = { from: accounts[1], gas: 3000000, value: 1 * ether };
+    var regTxOpts = {
+      from: accounts[1],
+      gas: 3000000,
+      value: 1 * ether
+    };
     var instance = await ddns.deployed();
     await instance.register(domain, ipfsAddr, regTxOpts);
 
+    var diffUserOpts = {
+      from: accounts[2],
+      gas: 3000000
+    };
+
     try {
-      var diffUserOpts = { from: accounts[2], gas: 3000000 };
       await instance.edit(domain, "edited", diffUserOpts);
-      assert(false, "Expected 'edit' to throw an exception, but it didn't.");
+      assert(false, "expected 'edit' to throw an exception, but it didn't.");
     } catch (error) {
       expect(error.message).to.equal("VM Exception while processing transaction: revert");
     }
@@ -208,14 +261,22 @@ contract('DDNS test', async (accounts) => {
   it("Register domain and try to transfer with different user", async () => {
     var domain = randomDomainName(20);
 
-    var regTxOpts = { from: accounts[1], gas: 3000000, value: 1 * ether };
+    var regTxOpts = {
+      from: accounts[1],
+      gas: 3000000,
+      value: 1 * ether
+    };
     var instance = await ddns.deployed();
     await instance.register(domain, ipfsAddr, regTxOpts);
 
+    var diffUserOpts = {
+      from: accounts[2],
+      gas: 3000000
+    };
+
     try {
-      var diffUserOpts = { from: accounts[2], gas: 3000000 };
       await instance.transferDomain(domain, accounts[3], diffUserOpts);
-      assert(false, "Expected 'transferDomain' to throw an exception, but it didn't.");
+      assert(false, "expected 'transferDomain' to throw an exception, but it didn't.");
     } catch (error) {
       expect(error.message).to.equal("VM Exception while processing transaction: revert");
     }
@@ -254,10 +315,15 @@ contract('DDNS test', async (accounts) => {
     var domain = "";
     var instance = await ddns.deployed();
 
+    var regTxOpts = {
+      from: accounts[1],
+      gas: 3000000,
+      value: 2 * ether
+    };
+
     try {
-      var regTxOpts = { from: accounts[1], gas: 3000000, value: 2 * ether };
       await instance.register(domain, ipfsAddr, regTxOpts);
-      assert(false, "Expected 'transferDomain' to throw an exception, but it didn't.");
+      assert(false, "expected 'register' to throw an exception, but it didn't.");
     } catch (error) {
       expect(error.message).to.equal("VM Exception while processing transaction: revert");
     }
@@ -268,7 +334,11 @@ contract('DDNS test', async (accounts) => {
     var now = new Date() - 0; // '-0' converts it to number
 
 
-    var regTxOpts = { from: accounts[1], gas: 3000000, value: 50 * ether };
+    var regTxOpts = {
+      from: accounts[1],
+      gas: 3000000,
+      value: 50 * ether
+    };
     var instance = await ddns.deployed();
     await instance.register(domain, ipfsAddr, regTxOpts);
 
@@ -288,7 +358,11 @@ contract('DDNS test', async (accounts) => {
     var now = new Date() - 0; // '-0' converts it to number
 
 
-    var regTxOpts = { from: accounts[1], gas: 3000000, value: 10 * ether };
+    var regTxOpts = {
+      from: accounts[1],
+      gas: 3000000,
+      value: 10 * ether
+    };
     var instance = await ddns.deployed();
     await instance.register(domain, ipfsAddr, regTxOpts);
 
@@ -308,7 +382,11 @@ contract('DDNS test', async (accounts) => {
     var now = new Date() - 0; // '-0' converts it to number
 
 
-    var regTxOpts = { from: accounts[1], gas: 3000000, value: 5 * ether };
+    var regTxOpts = {
+      from: accounts[1],
+      gas: 3000000,
+      value: 5 * ether
+    };
     var instance = await ddns.deployed();
     await instance.register(domain, ipfsAddr, regTxOpts);
 
@@ -327,8 +405,11 @@ contract('DDNS test', async (accounts) => {
     var domain = randomDomainName(8);
     var now = new Date() - 0; // '-0' converts it to number
 
-
-    var regTxOpts = { from: accounts[1], gas: 3000000, value: 2 * ether };
+    var regTxOpts = {
+      from: accounts[1],
+      gas: 3000000,
+      value: 2 * ether
+    };
     var instance = await ddns.deployed();
     await instance.register(domain, ipfsAddr, regTxOpts);
 
@@ -347,22 +428,106 @@ contract('DDNS test', async (accounts) => {
   /** OWNER */
   it("Test withdrawing", async () => {
     var instance = await ddns.deployed();
-    var opts = { from: accounts[0], gas: 3000000 };
+    var opts = {
+      from: accounts[0],
+      gas: 3000000
+    };
     await instance.withdraw(5 * ether, opts);
   })
 
   ////////////////////////////////////////
-  /** HARDCORE */
+  /** OTHER */
   it("Try to send money for no reason (low gas)", async () => {
     var instance = await ddns.deployed();
+    var regTxOpts = {
+      from: accounts[1],
+      gas: 3000000,
+      value: 2 * ether
+    };
 
     try {
-      var regTxOpts = { from: accounts[1], gas: 3000000, value: 2 * ether };
-      await web3.eth.sendTransaction({from:accounts[0], to:instance.address, value: 5 * ether});
-      assert(false, "Expected 'sendTransaction' to throw an exception, but it didn't.");
+      await web3.eth.sendTransaction({
+        from: accounts[0],
+        to: instance.address,
+        value: 5 * ether
+      });
+      assert(false, "expected 'sendTransaction' to throw an exception, but it didn't.");
     } catch (error) {
       expect(error.message).to.equal("VM Exception while processing transaction: revert");
     }
   })
+  it("Get receits of user", async () => {
+    var startTime = (new Date() - 0) / 1000 | 0;
+    var domain = randomDomainName(20);
 
+    var regTxOpts = {
+      from: accounts[3],
+      gas: 3000000,
+      value: 1 * ether
+    };
+    var instance = await ddns.deployed();
+    await instance.register(domain, ipfsAddr, regTxOpts);
+    await instance.register(domain, ipfsAddr, regTxOpts);
+    await instance.register(domain, ipfsAddr, regTxOpts);
+    await instance.register(domain, ipfsAddr, regTxOpts);
+
+    var receipts = [
+      await instance.receipts.call(accounts[3], 0),
+      await instance.receipts.call(accounts[3], 1),
+      await instance.receipts.call(accounts[3], 2),
+      await instance.receipts.call(accounts[3], 3)
+    ].map(arr => arr.map(n => n.toNumber()));
+
+    var i_amountPaidWei = 0;
+    var i_timestamp = 1;
+    var i_expires = 2;
+
+    expect(receipts.length).to.equal(4, "wrong number of receits");
+    expect(receipts[2][i_amountPaidWei]).to.equal(ether, "wrong amountPaidWei in receits");
+
+    for (let i = 0; i < 4; i++) {
+      var actual = receipts[i][i_expires];
+      var shouldBeBiggerThan = startTime + ((i + 1) * year) - 3 * day; // 3 day tolerance
+      assert(actual >= shouldBeBiggerThan,
+        "Wrong expiration date in receits[" + i + "] - expected " + actual +
+        " to be bigger than " + shouldBeBiggerThan);
+    }
+  })
+
+  it("A domain name can expire", async () => {
+    var startTime = (new Date() - 0) / 1000 | 0;
+    var domain = randomDomainName(20);
+
+    var regTxOpts = {
+      from: accounts[3],
+      gas: 3000000,
+      value: 1 * ether
+    };
+    var instance = await ddns.deployed();
+    await instance.register(domain, ipfsAddr, regTxOpts);
+
+    increaseTime(1.5 * year);
+
+    var expires = await instance.getExpirationDate.call(domain)
+    var shouldBeBiggerThan = startTime + 1.5 * year - 3 * day; // 3 day tolerance
+    
+    assert(expires <= shouldBeBiggerThan,
+      "Wrong expiration date - expected " + expires +
+      " to be smaller than " + shouldBeBiggerThan);
+
+    var isFree = await instance.isDomainFree.call(domain);
+    expect(isFree).to.equal(false, "expired domain should be free");
+
+    try {
+      await instance.getIP.call(domain);
+      assert(false, "expired domain should not return an address");
+    } catch (error) {
+      expect(error.message).to.equal("VM Exception while processing transaction: revert");
+    }
+
+    var owner = await instance.getOwnerOf.call(domain);
+    expect(owner).to.equal(0, "expired domain should have no owner");
+
+    assert(false, "NOT IMPLEMENTED!");
+  })
 })

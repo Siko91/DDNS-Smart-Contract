@@ -85,7 +85,7 @@ contract DDNS is Owned {
     uint public price = 1 ether;
 
     mapping (bytes => Domain) domains;
-    mapping (address => Receipt[]) receipts;
+    mapping (address => Receipt[]) public receipts;
 
     event domainRegisteredEvent (address actor, bytes domain, uint weiPaid, uint expires);
     event domainExtendedEvent (address actor, bytes domain, uint weiPaid, uint expires);
@@ -150,9 +150,9 @@ contract DDNS is Owned {
         }
     }
     
-    function getReceipts(address account) public view returns (Receipt[]) {
-        return receipts[account];
-    }
+    // function getReceipts(address account) public view returns (Receipt[]) {
+    //     return receipts[account];
+    // }
 
     function isDomainFree(bytes domain) public view returns (bool) {
         return domains[domain].expires < block.timestamp;
