@@ -10,6 +10,68 @@ if (!web3) {
     init();
 }
 
+/** returns pretty much the same object, but makes it log when it's methods are called */
+function objectWithLoggingMethods(obj, recursive){
+    var result = {};
+    var properties = [];
+    for (var i in obj)
+        properties.push(i);
+    
+    properties.forEach(function(i) {
+        if (typeof obj[i] === "function") {
+            result[i] = function(){
+                var args= Object.keys(arguments).map(k=>arguments[k]);
+                console.log("-----------------")
+                console.log("Calling function '" + i + "' with ( " + args + " )");
+                var outcome = obj[i].apply(this, args);
+                console.log("Finished '" + i + "'. Outcome : " + outcome);
+                return outcome;
+            }
+            result[i].call = function(){
+                var args= Object.keys(arguments).map(k=>arguments[k]);
+                console.log("-----------------")
+                console.log("Calling function '" + i + ".call' with ( " + args + " )");
+                var outcome = obj[i].call.apply(this, args);
+                console.log("Finished '" + i + "'. Outcome : " + outcome);
+                return outcome;
+            }
+        }
+        else if(recursive)
+            result[i] = objectWithLoggingMethods(obj[i]);
+        else
+            result[i] = obj[i];
+    }, this);
+
+    if(properties.length == 0)
+        result = obj;
+
+    return result;
+}
+
+/** wraps a standart callback (err, data) to add log statements around it */
+function callbackWithLog(callback) {
+    var result = function (err, data) {
+        if (!err) {
+            console.log("Success! result: " + data);
+            callback(undefined, data);
+        } else {
+            console.log("Something went wrong.");
+            console.error(err);
+            callback(err);
+        }
+    };
+    result.toString = function(){ return "function callbackWithLog(err,data){/**...*/}"; };
+    return result;
+}
+
+function getWeb3Accounts(callback) {
+    web3.eth.getAccounts(callbackWithLog(function (error, accounts) {
+        if(error)
+            return;
+        callback(accounts.map(a => web3.toChecksumAddress(a)));
+    }));
+}
+
 function init() {
     var Contract = web3.eth.contract(abi);
     contractInstance = Contract.at(address);
@@ -19,6 +81,8 @@ function init() {
     $("#btn-transfer").on("click", null, onTransferBtnPress);
     console.log("Welcome to our DAPP!");
     console.log(contractInstance);
+
+    contractInstance = objectWithLoggingMethods(contractInstance);
 }
 
 function openInNewTab(url) {
@@ -27,67 +91,44 @@ function openInNewTab(url) {
     win.focus();
 }
 
-function callContractMethod(methodName, args, value, callback, local) {
-
-    var onResponce = function (err, res) {
-        if (!err) {
-            console.log("Success! Transaction result: " + res);
-            callback(undefined, res);
-        } else {
-            console.log("Something went wrong.");
-            console.error(err);
-            callback(err);
-        }
-    };
-
-    web3.eth.getAccounts(function (error, accounts) {
-        var acc = web3.toChecksumAddress(accounts[0]) || "[web3.eth.accounts[0] == false]";
-        var options = { from: acc, gas: 3000000 };
-        if (value)
-            options.value = value;
-
-        console.log("Calling '" + methodName + "(" + args.map(i => JSON.stringify(i)) + ")' with options: " + JSON.stringify(options, null, 2));
-
-        args.push(options);
-        args.push(onResponce);
-
-        var funcToCall = local ? contractInstance[methodName] : contractInstance[methodName].call;
-        funcToCall.apply(this, args);
-    });
-}
-
 function onRegisterBtnPress() {
     var domain = $("#domain-reg").val();
     var addr = $("#addr-reg").val();
     var years = parseInt($("#years-reg").val());
 
-
-    callContractMethod("getPrice", [domain], null, function (err, price) {
-        if (!err) {
-            callContractMethod("register", [domain, addr], parseInt(price) * years, function (err, outcome) {
-                if (!err)
+    getWeb3Accounts(function (accounts) {
+        var op = { from: accounts[0], gas: 3000000 };
+        contractInstance.getPrice.call(domain, op, callbackWithLog(function (err, price) {
+            if (err) 
+                return alert("Something went wrong. See the console for more details.");
+        
+            var toPay = parseInt(price) * years;
+            var op = { from: accounts[0], gas: 3000000, value: toPay };
+            contractInstance.register(domain, addr, op, callbackWithLog(function (err2, data2) { 
+                if (!err2)
                     alert("Success");
                 else
                     alert("Something went wrong. See the console for more details.");
-            });
-        }
-        else {
-            alert("Something went wrong. See the console for more details.");
-        }
-    })
+            }));
+        }));
+    });
 }
 
 function onGoBtnPress() {
     var domain = $("#domain-go").val();
-    callContractMethod("getIP", [domain], null, function (err, outcome) {
-        if (!err) {
-            var ipfsAddress = bytesToString(hexToBytes(outcome));
-            var url = "https://ipfs.io/ipfs/"+ipfsAddress;
-            openInNewTab(url);
-        } else {
-            alert("Something went wrong. See the console for more details.");
-        }
-    })
+
+    getWeb3Accounts(function (accounts) {
+        var op = { from: accounts[0], gas: 3000000 };
+        contractInstance.getIP.call(domain, op, callbackWithLog(function (err, data) {
+            if (!err) {
+                var ipfsAddress = bytesToString(hexToBytes(data));
+                var url = "https://ipfs.io/ipfs/"+ipfsAddress;
+                openInNewTab(url);
+            } else {
+                alert("Something went wrong. See the console for more details.");
+            }
+        }));
+    });
 }
 
 function hexToBytes(hex) {
@@ -112,11 +153,14 @@ function onEditBtnPress() {
     var domain = $("#domain-edit").val();
     var addr = $("#addr-edit").val();
 
-    callContractMethod("edit", [domain, addr], null, function (err, outcome) {
-        if (!err)
-            alert("Success");
-        else
-            alert("Something went wrong. See the console for more details.");
+    getWeb3Accounts(function (accounts) {
+        var op = { from: accounts[0], gas: 3000000 };
+        contractInstance.edit(domain, addr, op, callbackWithLog(function (err, data) { 
+            if (!err)
+                alert("Success");
+            else
+                alert("Something went wrong. See the console for more details.");
+        }));
     });
 }
 
@@ -129,10 +173,13 @@ function onTransferBtnPress() {
         return;
     }
 
-    callContractMethod("transferDomain", [domain, owner], null, function (err, outcome) {
-        if (!err)
-            alert("Success");
-        else
-            alert("Something went wrong. See the console for more details.");
+    getWeb3Accounts(function (accounts) {
+        var op = { from: accounts[0], gas: 3000000 };
+        contractInstance.transferDomain(domain, owner, op, callbackWithLog(function (err, data) { 
+            if (!err)
+                alert("Success");
+            else
+                alert("Something went wrong. See the console for more details.");
+        }));
     });
 }
