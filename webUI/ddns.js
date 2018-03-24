@@ -41,7 +41,7 @@ function callContractMethod(methodName, args, value, callback, local) {
     };
 
     web3.eth.getAccounts(function (error, accounts) {
-        var acc = accounts[0] || "[web3.eth.accounts[0] == false]";
+        var acc = web3.toChecksumAddress(accounts[0]) || "[web3.eth.accounts[0] == false]";
         var options = { from: acc, gas: 3000000 };
         if (value)
             options.value = value;
