@@ -61,7 +61,7 @@ A final project for my solidity course.
  -----------------------------------
 
 ### Contract Template: 
-### **THE.CONTRACT.WAS.NOT.FOLLOWED.STRICTLY**
+### **THE TEMPLATE WAS NOT FOLLOWED STRICTLY**
 
 ```
     contract DDNS {
