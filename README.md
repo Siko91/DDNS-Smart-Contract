@@ -3,6 +3,7 @@
 # DDNS-Smart-Contract
 A final project for my solidity course.
 
+ - Git : https://github.com/Siko91/DDNS-Smart-Contract/
  - Web Preview : [RawGit Link](https://rawgit.com/Siko91/DDNS-Smart-Contract/master/webUI/index.html)
 
 ##  [ DDNS ]
@@ -59,7 +60,8 @@ A final project for my solidity course.
 
  -----------------------------------
 
-### Contract Template:
+### Contract Template: 
+### **THE.CONTRACT.WAS.NOT.FOLLOWED.STRICTLY**
 
 ```
     contract DDNS {
